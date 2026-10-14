@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stesen Kembara Membaca VKVK</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Fredoka & Lexend -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lexend:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 2px, transparent 2px);
+            background-size: 24px 24px;
+            overflow-x: hidden;
+        }
+
+        .font-lexend {
+            font-family: 'Lexend', sans-serif;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+
+        @keyframes micPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .mic-active {
+            animation: micPulse 1.5s infinite;
+            background-color: #ef4444 !important;
+        }
+
+        .bounce-hover {
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bounce-hover:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.15);
+        }
+        .bounce-hover:active {
+            transform: translateY(2px) scale(0.97);
+        }
+
+        @keyframes gentleShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: gentleShake 0.4s ease-in-out;
+        }
+
+        .vowel-color {
+            color: #dc2626;
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+        }
+        
+        .kvk-color {
+            color: #2563eb;
+            background-color: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        .train-tracks {
+            background: repeating-linear-gradient(
+                90deg,
+                #854d0e,
+                #854d0e 12px,
+                #fef08a 12px,
+                #fef08a 28px
+            );
+            height: 12px;
+            border-radius: 6px;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+            50% { border-color: #60a5fa; box-shadow: 0 0 25px rgba(96, 165, 250, 0.8); }
+        }
+
+        .step-active {
+            animation: pulse-border 1.8s infinite ease-in-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-float, .mic-active, .step-active, .animate-shake {
+                animation: none !important;
+            }
+            .bounce-hover {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 pb-12 flex flex-col justify-between">
+
+    <div>
+        <!-- Header -->
+        <header class="bg-amber-400 border-b-8 border-amber-500 shadow-lg pt-4 pb-6 px-4 relative overflow-hidden">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+                <div class="flex items-center gap-3 text-center md:text-left">
+                    <div class="bg-white p-3.5 rounded-2xl shadow-md text-amber-600 text-3xl md:text-4xl animate-float">
+                        <i class="fa-solid fa-train-subway"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-amber-950 tracking-wide drop-shadow-sm">
+                            STESEN KEMBARA MEMBACA VKVK
+                        </h1>
+                        <p class="text-amber-800 font-semibold text-sm md:text-base">
+                            Bimbingan Membaca Interaktif Murid Inklusif Tahun 2
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-amber-100 border-2 border-amber-300 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-inner">
+                    <i id="starIcon" class="fa-solid fa-star text-amber-500 text-2xl transition-transform duration-300"></i>
+                    <div>
+                        <span class="text-xs uppercase font-bold text-amber-700 block leading-tight">Bintang Saya</span>
+                        <span id="starCount" class="text-xl font-black text-amber-900">0 / 14</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 max-w-6xl mx-auto train-tracks opacity-80"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-4 mt-6">
+
+            <!-- Teacher Instructions -->
+            <section class="bg-white rounded-3xl border-4 border-amber-300 p-5 md:p-6 shadow-md mb-8 relative">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <div class="shrink-0 bg-amber-100 p-4 rounded-2xl text-amber-600 text-4xl flex items-center justify-center animate-float">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center justify-between mb-1">
+                            <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">
+                                Arahan Guru <span class="text-xl">🌈</span>
+                            </h2>
+                            <button onclick="speakInstruction()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold px-3.5 py-2 rounded-xl text-sm flex items-center gap-2 shadow transition">
+                                <i class="fa-solid fa-volume-high"></i> Dengar Arahan
+                            </button>
+                        </div>
+                        <p class="text-slate-700 font-medium text-base md:text-lg leading-relaxed font-lexend">
+                            "Selamat datang ke Stesen Kembara Membaca VKVK! 🌈 Jom kita teroka dunia perkataan bersama-sama! Pilih dan tekan mana-mana kad perkataan. Dengar sebutan cikgu, ikut langkah mengeja dan baca perkataan dengan kuat. Selepas itu, cuba sebut sendiri. Jangan risau jika tersilap, ya! Teruskan mencuba. Kamu pasti boleh!"
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cards Grid -->
+            <section class="mb-10">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-ticket text-amber-500"></i> Pilih Kad Perkataan
+                    </h3>
+                    <span class="text-sm font-semibold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-300">
+                        14 Perkataan VKVK
+                    </span>
+                </div>
+
+                <div id="wordsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="text-center py-4 text-xs font-semibold text-slate-500 border-t border-slate-200 mt-8">
+        <p>Stesen Kembara Membaca VKVK • Modul Pembelajaran Membaca Bahasa Melayu Sekolah Rendah</p>
+    </footer>
+
+    <!-- POP-UP MODAL -->
+    <div id="wordModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl border-8 border-amber-300 shadow-2xl max-w-2xl w-full max-h-[94vh] overflow-y-auto p-5 md:p-7 relative transform scale-95 transition-transform duration-300" id="modalContent">
+            
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-600 font-bold p-3 rounded-full shadow transition-transform active:scale-90 flex items-center justify-center w-11 h-11 text-xl z-20" title="Kembali ke Stesen">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-4">
+                <span class="bg-amber-100 text-amber-800 text-xs md:text-sm font-bold px-4 py-1 rounded-full uppercase tracking-wider inline-block mb-2">
+                    Stesen Pembelajaran Perkataan
+                </span>
+                <div class="flex items-center justify-center gap-3">
+                    <span id="modalTargetWord" class="text-4xl md:text-6xl font-black text-slate-800 tracking-wide">
+                        --
+                    </span>
+                    <button onclick="playTargetWordAudio()" class="bg-amber-500 hover:bg-amber-600 text-white rounded-2xl p-3 shadow-md active:scale-95 transition" title="Dengar Perkataan Penuh">
+                        <i class="fa-solid fa-volume-high text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center mb-5 flex flex-col items-center justify-center min-h-[160px] shadow-inner relative overflow-hidden">
+                <div id="modalIllustration" class="my-1 flex items-center justify-center min-h-[90px]">
+                    🖼️
+                </div>
+                <p id="modalWordMeaning" class="text-sm font-semibold text-slate-600 capitalize mt-2 bg-white px-4 py-1 rounded-full border border-slate-200 shadow-sm">
+                    --
+                </p>
+            </div>
+
+            <div class="bg-blue-50/70 rounded-2xl p-4 md:p-5 border-2 border-blue-200 mb-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold text-slate-800 flex items-center gap-2 text-base md:text-lg">
+                        <i class="fa-solid fa-layer-group text-blue-500"></i> Panduan Mengeja Mengikut Ceraian
+                    </h4>
+                    <span id="stepIndicator" class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full border border-blue-200">
+                        Langkah 1 dari 3
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 md:gap-3 text-center my-3">
+                    <div id="stepCard1" class="border-4 rounded-2xl p-2.5 bg-white transition-all duration-300 flex flex-col items-center justify-center">
+                        <span class="text-xs font-bold text-slate-400 mb-1">1. Vokal (V)</span>
+                        <span id="sylVowel" class="text-3xl md:text-5xl font-black vowel-color px-3 py-1 rounded-xl border-2">a</span>
+                    </div>
+
+                    <div id="stepCard2" class="border-4 rounded-2xl p-2.5 bg-white transition-all duration-300 flex flex-col items-center justify-center opacity-50">
+                        <span class="text-xs font-bold text-slate-400 mb-1">2. Suku Kata (KVK)</span>
+                        <span id="sylKVK" class="text-3xl md:text-5xl font-black kvk-color px-3 py-1 rounded-xl border-2">dik</span>
+                    </div>
+
+                    <div id="stepCard3" class="border-4 rounded-2xl p-2.5 bg-white transition-all duration-300 flex flex-col items-center justify-center opacity-50">
+                        <span class="text-xs font-bold text-slate-400 mb-1">3. Gabungan</span>
+                        <div class="text-2xl md:text-4xl font-black flex items-center gap-1">
+                            <span id="sylCombineV" class="text-red-600">a</span>
+                            <span class="text-slate-400 text-sm">+</span>
+                            <span id="sylCombineKVK" class="text-blue-600">dik</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stepExplanation" class="bg-white border border-blue-200 rounded-xl p-3 text-center font-lexend font-semibold text-slate-700 text-sm md:text-base shadow-sm">
+                    Sebut bahagian vokal pertama...
+                </div>
+
+                <div class="flex justify-between items-center mt-4 gap-2">
+                    <button id="btnPrevStep" onclick="prevStep()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm transition active:scale-95 disabled:opacity-40" disabled>
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Undur
+                    </button>
+                    <button onclick="playTeacherGuidance()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2 rounded-xl text-sm transition shadow active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-play text-lg"></i> Panduan Cikgu
+                    </button>
+                    <button id="btnNextStep" onclick="nextStep()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition active:scale-95">
+                        Maju <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="playStepByStepAudio()" class="flex-1 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base transition">
+                    <i class="fa-solid fa-rotate-right text-lg"></i>
+                    <span>Dengar Lagi</span>
+                </button>
+
+                <button id="btnPracticeMic" onclick="toggleSpeechRecognition()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base transition">
+                    <i id="micIcon" class="fa-solid fa-microphone text-lg"></i>
+                    <span id="micBtnText">🎙️ Tekan untuk Sebut</span>
+                </button>
+            </div>
+
+            <div id="speechStatusBox" class="mt-4 p-3 rounded-2xl text-center border-2 border-slate-200 bg-slate-50 transition-all duration-300">
+                <div class="text-xs font-bold uppercase text-slate-500 mb-1" id="speechStatusTitle">Status Pengecaman Suara</div>
+                <div id="speechStatusMessage" class="text-sm font-semibold text-slate-700">
+                    Sedia untuk mendengar. Sila tekan butang <strong>Tekan untuk Sebut</strong> dan sebut perkataan.
+                </div>
+                <div id="transcriptContainer" class="mt-2 hidden">
+                    <span class="text-xs text-slate-500 block">Suara yang dikesan:</span>
+                    <span id="transcriptText" class="text-lg font-black text-amber-900 bg-amber-100 px-3 py-1 rounded-lg border border-amber-300 inline-block mt-1">
+                        ""
+                    </span>
+                </div>
+            </div>
+
+            <div id="feedbackBanner" class="mt-4 p-3 rounded-2xl text-center font-bold text-base hidden">
+                --
+            </div>
+
+            <p class="text-[11px] text-slate-400 text-center mt-3">
+                <i class="fa-solid fa-circle-info mr-1"></i> Pengecaman suara memerlukan kebenaran mikrofon dan sokongan pelayar.
+            </p>
+
+            <div class="mt-5 text-center pt-3 border-t border-slate-100">
+                <button onclick="closeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-6 py-2.5 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-house mr-1"></i> Kembali ke Stesen
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const vkvkWords = [
+            { id: 1, word: 'adik', v: 'a', kvk: 'dik', icon: `...`, desc: 'Adik comel' },
+            { id: 2, word: 'akar', v: 'a', kvk: 'kar', icon: `...`, desc: 'Akar pokok' },
+            { id: 3, word: 'awan', v: 'a', kvk: 'wan', icon: `...`, desc: 'Awan biru' },
+            { id: 4, word: 'ekor', v: 'e', kvk: 'kor', icon: `...`, desc: 'Ekor kucing' },
+            { id: 5, word: 'epal', v: 'e', kvk: 'pal', icon: `...`, desc: 'Epal merah' },
+            { id: 6, word: 'enam', v: 'e', kvk: 'nam', icon: `...`, desc: 'Nombor enam' },
+            { id: 7, word: 'ikan', v: 'i', kvk: 'kan', icon: `...`, desc: 'Ikan berenang' },
+            { id: 8, word: 'itik', v: 'i', kvk: 'tik', icon: `...`, desc: 'Itik comel' },
+            { id: 9, word: 'oren', v: 'o', kvk: 'ren', icon: `...`, desc: 'Buah oren' },
+            { id: 10, word: 'obor', v: 'o', kvk: 'bor', icon: `...`, desc: 'Obor api' },
+            { id: 11, word: 'otak', v: 'o', kvk: 'tak', icon: `...`, desc: 'Otak pandai' },
+            { id: 12, word: 'ubat', v: 'u', kvk: 'bat', icon: `...`, desc: 'Ubat kesihatan' },
+            { id: 13, word: 'ular', v: 'u', kvk: 'lar', icon: `...`, desc: 'Ular panjang' },
+            { id: 14, word: 'ulat', v: 'u', kvk: 'lat', icon: `...`, desc: 'Ulat bulu' }
+        ];
+
+        let currentWordIndex = 0;
+        let currentStep = 1;
+        let completedWords = new Set();
+        let isSpeaking = false;
+        let currentAudioObj = null;
+
+        let recognition = null;
+        let isListening = false;
+        let isSpeechSupported = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGridCards();
+            updateStarCount();
+            initSpeechRecognition();
+        });
+
+        function getItemGraphicHTML(item, sizeClass = "w-20 h-20 md:w-24 md:h-24") {
+            const pngPath = `assets/images/words/${item.word}.png`;
+            return `
+                <div class="relative flex items-center justify-center">
+                    <img src="${pngPath}" 
+                         alt="${item.word}" 
+                         class="${sizeClass} object-contain inline-block drop-shadow-md" 
+                         onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');" />
+                    <div class="hidden flex items-center justify-center ${sizeClass}">
+                        ${item.icon}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGridCards() {
+            const container = document.getElementById('wordsGrid');
+            container.innerHTML = '';
+
+            vkvkWords.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-3xl border-4 border-slate-200 p-4 flex flex-col items-center justify-between text-center cursor-pointer shadow-md bounce-hover relative overflow-hidden group hover:border-amber-400`;
+                card.onclick = () => openWordModal(index);
+
+                const isCompleted = completedWords.has(item.word);
+
+                card.innerHTML = `
+                    ${isCompleted ? `<div class="absolute top-2 right-2 text-amber-500 text-lg"><i class="fa-solid fa-star"></i></div>` : ''}
+                    <div class="my-2 transform group-hover:scale-110 transition duration-200 min-h-[70px] flex items-center justify-center">
+                        ${getItemGraphicHTML(item)}
+                    </div>
+                    <div class="my-1">
+                        <span class="text-2xl md:text-3xl font-black text-slate-800 tracking-wider">
+                            <span class="text-red-600">${item.v}</span><span class="text-blue-600">${item.kvk}</span>
+                        </span>
+                    </div>
+                    <div class="mt-2 w-full flex items-center justify-center gap-1 text-xs font-bold bg-amber-100 group-hover:bg-amber-400 text-amber-800 group-hover:text-amber-950 py-1.5 px-3 rounded-xl transition">
+                        <i class="fa-solid fa-volume-high"></i> Eja & Baca
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* PERBAIKAN PENTING: Pengurusan Audio Mengelakkan Bertindih & Ralat Netlify Path */
+        function stopAllAudio() {
+            if (currentAudioObj) {
+                currentAudioObj.onended = null;
+                currentAudioObj.onerror = null;
+                currentAudioObj.pause();
+                currentAudioObj.currentTime = 0;
+                currentAudioObj = null;
+            }
+            if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+            isSpeaking = false;
+        }
+
+        function playAudioWithFallback(audioPath, fallbackText, onEndCallback = null) {
+            stopAllAudio();
+
+            if (audioPath) {
+                // Gunakan path relatif tanpa slash di hadapan
+                const cleanPath = audioPath.startsWith('/') ? audioPath.substring(1) : audioPath;
+                const audio = new Audio(cleanPath);
+                currentAudioObj = audio;
+                isSpeaking = true;
+
+                let callbackCalled = false;
+                const safeCallback = () => {
+                    if (!callbackCalled) {
+                        callbackCalled = true;
+                        isSpeaking = false;
+                        if (currentAudioObj === audio) {
+                            currentAudioObj = null;
+                        }
+                        if (onEndCallback) onEndCallback();
+                    }
+                };
+
+                audio.onended = safeCallback;
+
+                audio.onerror = (e) => {
+                    console.warn(`Gagal memuatkan fail MP3 di: ${cleanPath}. Menggunakan pertuturan asas pelayar.`, e);
+                    if (currentAudioObj === audio) {
+                        currentAudioObj = null;
+                    }
+                    speakMalayText(fallbackText, onEndCallback);
+                };
+
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.warn(`Sebab sekatan pelayar atau fail tiada (${cleanPath}), pertuturan automatik digunakan.`, err);
+                        if (currentAudioObj === audio) {
+                            currentAudioObj = null;
+                        }
+                        speakMalayText(fallbackText, onEndCallback);
+                    });
+                }
+            } else {
+                speakMalayText(fallbackText, onEndCallback);
+            }
+        }
+
+        function speakMalayText(text, onEndCallback = null) {
+            stopAllAudio();
+
+            if (!('speechSynthesis' in window)) {
+                if (onEndCallback) onEndCallback();
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ms-MY';
+            utterance.rate = 0.82;
+            utterance.pitch = 1.05;
+
+            const voices = window.speechSynthesis.getVoices();
+            const msVoice = voices.find(v => v.lang && (v.lang.includes('ms') || v.lang.includes('id')));
+            if (msVoice) utterance.voice = msVoice;
+
+            let callbackCalled = false;
+            const safeCallback = () => {
+                if (!callbackCalled) {
+                    callbackCalled = true;
+                    isSpeaking = false;
+                    if (onEndCallback) onEndCallback();
+                }
+            };
+
+            utterance.onend = safeCallback;
+            utterance.onerror = safeCallback;
+
+            isSpeaking = true;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* 1. ARAHAN UTAMA: assets/audio/gui/arahan_utama.mp3 */
+        function speakInstruction() {
+            const text = "Selamat datang ke Stesen Kembara Membaca VKVK! Jom kita teroka dunia perkataan bersama-sama! Pilih dan tekan mana-mana kad perkataan. Dengar sebutan cikgu, ikut langkah mengeja dan baca perkataan dengan kuat. Selepas itu, cuba sebut sendiri. Jangan risau jika tersilap, ya! Teruskan mencuba. Kamu pasti boleh!";
+            playAudioWithFallback('assets/audio/gui/arahan_utama.mp3', text);
+        }
+
+        /* 2. PANDUAN GURU: assets/audio/gui/panduan_guru.mp3 */
+        function playTeacherGuidance(onComplete = null) {
+            const guidanceText = "Dengar sebutan cikgu, ya! Mula-mula, sebut bahagian pertama. Kemudian, sebut bahagian kedua. Sekarang, gabungkan kedua-duanya dan baca perkataan ini bersama-sama. Bagus! Cuba sekali lagi!";
+            playAudioWithFallback('assets/audio/gui/panduan_guru.mp3', guidanceText, onComplete);
+        }
+
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (SpeechRecognition) {
+                isSpeechSupported = true;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'ms-MY';
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    updateMicUI('listening');
+                };
+
+                recognition.onresult = (event) => {
+                    const resultText = event.results[0][0].transcript;
+                    handleRecognitionResult(resultText);
+                };
+
+                recognition.onerror = (event) => {
+                    handleRecognitionError(event.error);
+                };
+
+                recognition.onend = () => {
+                    isListening = false;
+                    if (document.getElementById('micBtnText').innerText.includes('mendengar')) {
+                        updateMicUI('ready');
+                    }
+                };
+            } else {
+                isSpeechSupported = false;
+            }
+        }
+
+        function openWordModal(index) {
+            stopSpeechRecognition();
+            stopAllAudio();
+
+            currentWordIndex = index;
+            currentStep = 1;
+            const data = vkvkWords[index];
+
+            document.getElementById('modalTargetWord').innerHTML = `<span class="text-red-600">${data.v}</span><span class="text-blue-600">${data.kvk}</span>`;
+            
+            const modalIllus = document.getElementById('modalIllustration');
+            modalIllus.innerHTML = getItemGraphicHTML(data, "w-24 h-24 md:w-28 md:h-28");
+
+            document.getElementById('modalWordMeaning').innerText = data.desc;
+
+            document.getElementById('sylVowel').innerText = data.v;
+            document.getElementById('sylKVK').innerText = data.kvk;
+            document.getElementById('sylCombineV').innerText = data.v;
+            document.getElementById('sylCombineKVK').innerText = data.kvk;
+
+            document.getElementById('feedbackBanner').classList.add('hidden');
+            document.getElementById('transcriptContainer').classList.add('hidden');
+            resetSpeechStatus();
+
+            const modal = document.getElementById('wordModal');
+            const modalContent = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+
+            updateStepUI();
+            playTeacherGuidance(() => {
+                playCurrentStepAudio();
+            });
+        }
+
+        function closeModal() {
+            stopSpeechRecognition();
+            stopAllAudio();
+
+            const modal = document.getElementById('wordModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function updateStepUI() {
+            const data = vkvkWords[currentWordIndex];
+            document.getElementById('stepIndicator').innerText = `Langkah ${currentStep} dari 3`;
+
+            const card1 = document.getElementById('stepCard1');
+            const card2 = document.getElementById('stepCard2');
+            const card3 = document.getElementById('stepCard3');
+            const exp = document.getElementById('stepExplanation');
+
+            [card1, card2, card3].forEach(c => {
+                c.classList.remove('step-active', 'opacity-100', 'border-blue-500');
+                c.classList.add('opacity-50', 'border-slate-200');
+            });
+
+            if (currentStep === 1) {
+                card1.classList.remove('opacity-50');
+                card1.classList.add('step-active', 'border-blue-500');
+                exp.innerHTML = `Langkah 1: Sebut vokal <strong class="text-red-600 text-xl font-black">"${data.v}"</strong>`;
+            } else if (currentStep === 2) {
+                card2.classList.remove('opacity-50');
+                card2.classList.add('step-active', 'border-blue-500');
+                exp.innerHTML = `Langkah 2: Sebut suku kata <strong class="text-blue-600 text-xl font-black">"${data.kvk}"</strong>`;
+            } else if (currentStep === 3) {
+                card3.classList.remove('opacity-50');
+                card3.classList.add('step-active', 'border-blue-500');
+                exp.innerHTML = `Langkah 3: Gabungkan <strong class="text-red-600">${data.v}</strong> + <strong class="text-blue-600">${data.kvk}</strong> = <strong class="text-emerald-700 text-xl font-black">"${data.word}"</strong>`;
+            }
+
+            document.getElementById('btnPrevStep').disabled = (currentStep === 1);
+            document.getElementById('btnNextStep').disabled = (currentStep === 3);
+        }
+
+        function nextStep() {
+            if (currentStep < 3) {
+                currentStep++;
+                updateStepUI();
+                playCurrentStepAudio();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepUI();
+                playCurrentStepAudio();
+            }
+        }
+
+        /* 3. PERKATAAN: assets/audio/words/{word}.mp3 */
+        function playCurrentStepAudio() {
+            const data = vkvkWords[currentWordIndex];
+            if (currentStep === 1) {
+                speakMalayText(data.v);
+            } else if (currentStep === 2) {
+                speakMalayText(data.kvk);
+            } else if (currentStep === 3) {
+                playAudioWithFallback(`assets/audio/words/${data.word}.mp3`, `${data.v}... ${data.kvk}...${data.word}!`);
+            }
+        }
+
+        function playTargetWordAudio() {
+            const data = vkvkWords[currentWordIndex];
+            playAudioWithFallback(`assets/audio/words/${data.word}.mp3`, data.word);
+        }
+
+        function playStepByStepAudio() {
+            const data = vkvkWords[currentWordIndex];
+            playAudioWithFallback(`assets/audio/words/${data.word}.mp3`, `${data.v}. ${data.kvk}.${data.word}`);
+        }
+
+        function toggleSpeechRecognition() {
+            stopAllAudio();
+
+            if (!isSpeechSupported) {
+                simulateSpeechPractice();
+                return;
+            }
+
+            if (isListening) {
+                stopSpeechRecognition();
+            } else {
+                startSpeechRecognition();
+            }
+        }
+
+        function startSpeechRecognition() {
+            if (!recognition) return;
+            try {
+                resetSpeechStatus();
+                recognition.start();
+            } catch (err) {
+                stopSpeechRecognition();
+            }
+        }
+
+        function stopSpeechRecognition() {
+            if (recognition && isListening) {
+                recognition.stop();
+            }
+            isListening = false;
+            updateMicUI('ready');
+        }
+
+        function resetSpeechStatus() {
+            const statusBox = document.getElementById('speechStatusBox');
+            statusBox.className = "mt-4 p-3 rounded-2xl text-center border-2 border-slate-200 bg-slate-50 transition-all duration-300";
+            document.getElementById('speechStatusTitle').innerText = "Status Pengecaman Suara";
+            document.getElementById('speechStatusMessage').innerHTML = 'Sedia untuk mendengar. Sila tekan <strong>🎙️ Tekan untuk Sebut</strong>.';
+            document.getElementById('transcriptContainer').classList.add('hidden');
+        }
+
+        function updateMicUI(state) {
+            const btn = document.getElementById('btnPracticeMic');
+            const icon = document.getElementById('micIcon');
+            const btnText = document.getElementById('micBtnText');
+            const statusBox = document.getElementById('speechStatusBox');
+
+            if (state === 'listening') {
+                btn.className = "flex-1 bg-red-500 hover:bg-red-600 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base mic-active transition";
+                icon.className = "fa-solid fa-microphone-lines text-lg animate-bounce";
+                btnText.innerText = "Mikrofon Mendengar...";
+
+                statusBox.className = "mt-4 p-3 rounded-2xl text-center border-2 border-red-300 bg-red-50 transition-all duration-300";
+                document.getElementById('speechStatusMessage').innerHTML = '<span class="text-red-700 font-bold"><i class="fa-solid fa-circle-dot text-red-500 animate-pulse mr-1"></i> Mikrofon sedang mendengar sebutan kamu...</span>';
+            } else if (state === 'processing') {
+                btn.className = "flex-1 bg-amber-500 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base transition";
+                icon.className = "fa-solid fa-spinner animate-spin text-lg";
+                btnText.innerText = "Sedang Menyemak...";
+
+                statusBox.className = "mt-4 p-3 rounded-2xl text-center border-2 border-amber-300 bg-amber-50 transition-all duration-300";
+                document.getElementById('speechStatusMessage').innerHTML = '<span class="text-amber-800 font-bold">Sedang menyemak sebutan kamu...</span>';
+            } else {
+                btn.className = "flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base transition";
+                icon.className = "fa-solid fa-microphone text-lg";
+                btnText.innerText = "🎙️ Tekan untuk Sebut";
+            }
+        }
+
+        /* 4. FEEDBACK: assets/audio/feedback/pujian_x.mp3 & galakan_1.mp3 */
+        function handleRecognitionResult(spokenText) {
+            updateMicUI('processing');
+            const data = vkvkWords[currentWordIndex];
+            
+            const cleanSpoken = spokenText.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+            const cleanTarget = data.word.toLowerCase().trim();
+
+            document.getElementById('transcriptContainer').classList.remove('hidden');
+            document.getElementById('transcriptText').innerText = `"${spokenText}"`;
+
+            const feedback = document.getElementById('feedbackBanner');
+            const modalContent = document.getElementById('modalContent');
+            feedback.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-emerald-100', 'text-emerald-800', 'bg-amber-100', 'text-amber-800');
+
+            setTimeout(() => {
+                updateMicUI('ready');
+
+                if (cleanSpoken === cleanTarget || cleanSpoken.includes(cleanTarget)) {
+                    const praises = [
+                        { text: "Bagus! Sebutan kamu sangat jelas! 🌟", audio: "assets/audio/feedback/pujian_1.mp3" },
+                        { text: "Hebat! Kamu berjaya mengeja dengan betul! 🎉", audio: "assets/audio/feedback/pujian_2.mp3" },
+                        { text: "Tahniah, kamu berjaya! Syabas! 👏", audio: "assets/audio/feedback/pujian_3.mp3" }
+                    ];
+                    const selectedPraise = praises[Math.floor(Math.random() * praises.length)];
+
+                    feedback.classList.add('bg-emerald-100', 'text-emerald-800', 'border-2', 'border-emerald-300');
+                    feedback.innerText = selectedPraise.text;
+
+                    document.getElementById('speechStatusMessage').innerHTML = '<span class="text-emerald-700 font-bold">✓ Sebutan Diterima! Syabas!</span>';
+
+                    if (!completedWords.has(data.word)) {
+                        completedWords.add(data.word);
+                        updateStarCount();
+                        renderGridCards();
+                        animateStarIcon();
+                    }
+
+                    playAudioWithFallback(selectedPraise.audio, selectedPraise.text);
+                    triggerConfetti();
+                } else {
+                    const galakanText = `Jom cuba lagi! Sebut perkataan "${data.word}" dengan lebih jelas, ya. 💪`;
+                    feedback.classList.add('bg-amber-100', 'text-amber-800', 'border-2', 'border-amber-300');
+                    feedback.innerText = galakanText;
+
+                    document.getElementById('speechStatusMessage').innerHTML = '<span class="text-amber-700 font-bold">Jom cuba lagi! Tekan butang mikrofon dan sebut sekali lagi.</span>';
+
+                    modalContent.classList.add('animate-shake');
+                    setTimeout(() => modalContent.classList.remove('animate-shake'), 400);
+
+                    playAudioWithFallback('assets/audio/feedback/galakan_1.mp3', galakanText);
+                }
+            }, 600);
+        }
+
+        function handleRecognitionError(errorType) {
+            updateMicUI('ready');
+            const statusBox = document.getElementById('speechStatusBox');
+            statusBox.className = "mt-4 p-3 rounded-2xl text-center border-2 border-red-200 bg-red-50 transition-all duration-300";
+
+            if (errorType === 'not-allowed') {
+                document.getElementById('speechStatusMessage').innerHTML = '<span class="text-red-700 font-bold">Kebenaran mikrofon ditolak. Sila benarkan akses mikrofon.</span>';
+            } else if (errorType === 'no-speech') {
+                document.getElementById('speechStatusMessage').innerHTML = '<span class="text-amber-700 font-bold">Tiada suara dikesan. Sila cuba lagi.</span>';
+            } else {
+                document.getElementById('speechStatusMessage').innerHTML = '<span class="text-slate-700 font-bold">Menggunakan mod simulasi sebutan.</span>';
+            }
+        }
+
+        function simulateSpeechPractice() {
+            const data = vkvkWords[currentWordIndex];
+            const btn = document.getElementById('btnPracticeMic');
+            const feedback = document.getElementById('feedbackBanner');
+            const statusBox = document.getElementById('speechStatusBox');
+
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Cikgu Mendengar...`;
+            btn.className = "flex-1 bg-red-500 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base";
+
+            statusBox.className = "mt-4 p-3 rounded-2xl text-center border-2 border-amber-300 bg-amber-50";
+            document.getElementById('speechStatusMessage').innerHTML = `<span class="text-amber-800 font-bold">Sebut perkataan "${data.word}" sekarang! 🎙️</span>`;
+
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-microphone text-lg"></i> <span>🎙️ Tekan untuk Sebut</span>`;
+                btn.className = "flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-md flex items-center justify-center gap-2 text-base transition";
+
+                const praises = [
+                    { text: "Bagus! Sebutan kamu sangat jelas! 🌟", audio: "assets/audio/feedback/pujian_1.mp3" },
+                    { text: "Hebat! Kamu berjaya mengeja dengan betul! 🎉", audio: "assets/audio/feedback/pujian_2.mp3" },
+                    { text: "Tahniah, kamu berjaya! Syabas! 👏", audio: "assets/audio/feedback/pujian_3.mp3" }
+                ];
+                const selectedPraise = praises[Math.floor(Math.random() * praises.length)];
+
+                feedback.classList.remove('hidden', 'bg-amber-100', 'text-amber-800');
+                feedback.classList.add('bg-emerald-100', 'text-emerald-800', 'border-2', 'border-emerald-300');
+                feedback.innerText = selectedPraise.text;
+
+                if (!completedWords.has(data.word)) {
+                    completedWords.add(data.word);
+                    updateStarCount();
+                    renderGridCards();
+                    animateStarIcon();
+                }
+
+                playAudioWithFallback(selectedPraise.audio, selectedPraise.text);
+                triggerConfetti();
+
+            }, 2000);
+        }
+
+        function updateStarCount() {
+            document.getElementById('starCount').innerText = `${completedWords.size} / ${vkvkWords.length}`;
+        }
+
+        function animateStarIcon() {
+            const star = document.getElementById('starIcon');
+            star.classList.add('scale-150', 'text-amber-400');
+            setTimeout(() => {
+                star.classList.remove('scale-150', 'text-amber-400');
+            }, 500);
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
